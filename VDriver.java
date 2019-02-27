@@ -1,5 +1,17 @@
+import java.io.FileNotFoundException;
+
 public class VDriver{
-  public static void main(String[]args){
-    Maze m1 = new Maze("Maze1.txt");
+  public static void main(String[]args){    
+    String filename = "data3.dat"; 
+    try{
+      Maze f;
+      f = new Maze(filename);//true animates the maze.
+      
+      //f.setAnimate(true);
+      //f.solve();
+      System.out.println(f);
+    }catch(FileNotFoundException e){
+      System.out.println("Invalid filename: "+filename);
+    }
   }
 }
