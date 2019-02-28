@@ -86,11 +86,15 @@ public class Maze{
       Since the constructor exits when the file is not found or is missing an E or S, we can assume it exists.
     */
     public int solve(){
-            //find the location of the S.
-            //erase the S
-            //and start solving at the location of the s.
-            //return solve(???,???);
-            return solve(0,0); //dummy value
+      for (int r = 0; r < maze.length; r++){
+        for (int c = 0; c < maze[r].length; c++){
+          if (maze[r][c] == 'S'){
+            maze[r][c] = '@';
+            return solve(r,c, 1);
+          }
+        }
+      }
+      return -1; //just to compile
     }
 
     /*
@@ -103,15 +107,31 @@ public class Maze{
         All visited spots that were not part of the solution are changed to '.'
         All visited spots that are part of the solution are changed to '@'
     */
-    private int solve(int row, int col){ //you can add more parameters since this is private
+    private int solve(int r, int c, int squaresToE){ //you can add more parameters since this is private
         //automatic animation! You are welcome.
         if(animate){
             clearTerminal();
             System.out.println(this);
             wait(20);
         }
-        //COMPLETE SOLVE
-        return -1; //so it compiles
+        if (maze[r][c] == 'E'){
+          return squaresToE;
+        }
+        if (maze[r][c] == ' '){
+          maze[r][c] = '@';
+        }
+        if (maze[r][c] == '#'){
+          return 0; //hit a wall
+        }
+        //if the current position is surrounded by deadends...
+        if ((maze[r+1][c] == '@' || maze[r+1][c] == '#' || maze[r+1][c] == '.') &&
+            (maze[r-1][c] == '@' || maze[r-1][c] == '#' || maze[r-1][c] == '.') &&
+            (maze[r][c+1] == '@' || maze[r][c+1] == '#' || maze[r][c+1] == '.') &&
+            (maze[r][c-1] == '@' || maze[r][c-1] == '#' || maze[r][c-1] == '.')){
+              maze[r][c] = '.'; //...then mark this spot as visited but not correct path
+              return solve(r+1,c,squaresToE-1) + solve(r-1,c,squaresToE-1) + solve(r,c+1,squaresToE-1) + solve(r,c-1,squaresToE-1); //backtracks
+        }
+        return solve(r+1,c,squaresToE+1) + solve(r-1,c,squaresToE) + solve(r,c+1,squaresToE) + solve(r,c-1,squaresToE); //branches out
     }
 
 
