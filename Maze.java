@@ -117,11 +117,8 @@ public class Maze{
         if (maze[r][c] == 'E'){
           return squaresToE;
         }
-        if (maze[r][c] == ' '){
-          maze[r][c] = '@';
-        }
-        if (maze[r][c] == '#'){
-          return 0; //hit a wall
+        if (maze[r][c] == '#' || maze[r][c] == '.'){
+          return 0; //my current position is a wall or a place already visited
         }
         //if the current position is surrounded by deadends...
         if ((maze[r+1][c] == '@' || maze[r+1][c] == '#' || maze[r+1][c] == '.') &&
@@ -129,7 +126,14 @@ public class Maze{
             (maze[r][c+1] == '@' || maze[r][c+1] == '#' || maze[r][c+1] == '.') &&
             (maze[r][c-1] == '@' || maze[r][c-1] == '#' || maze[r][c-1] == '.')){
               maze[r][c] = '.'; //...then mark this spot as visited but not correct path
+              //System.out.println("r:"+r + ", c:"+c+"\n");
+              if (maze[r][c] == '@'){
+                return -1;
+              }
               return solve(r+1,c,squaresToE-1) + solve(r-1,c,squaresToE-1) + solve(r,c+1,squaresToE-1) + solve(r,c-1,squaresToE-1); //backtracks
+        }
+        if (maze[r][c] == ' '){
+          maze[r][c] = '@';
         }
         return solve(r+1,c,squaresToE+1) + solve(r-1,c,squaresToE) + solve(r,c+1,squaresToE) + solve(r,c-1,squaresToE); //branches out
     }
