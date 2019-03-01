@@ -6,6 +6,8 @@ import java.util.ArrayList;
 public class Maze{
     private char[][] maze;
     private boolean animate;//false by default
+    private int sum;
+    private boolean reachedEnd;
 
     /*Constructor loads a maze text file, and sets animate to false by default.
       1. The file contains a rectangular ascii maze, made with the following 4 characters:
@@ -45,6 +47,8 @@ public class Maze{
         if (numStarts != 1 || numEnds != 1){
           throw new IllegalStateException("You should only have 1 S and 1 E.");
         }
+        sum = 1;
+        reachedEnd = false;
       }
 
 
@@ -62,7 +66,7 @@ public class Maze{
 
     public void clearTerminal(){
         //erase terminal, go to top left of screen.
-        System.out.println("\033[2J\033[1;1H");
+        System.out.println();
     }
 
    /*Return the string that represents the maze.
@@ -90,7 +94,7 @@ public class Maze{
         for (int c = 0; c < maze[r].length; c++){
           if (maze[r][c] == 'S'){
             maze[r][c] = '@';
-            return solve(r,c, 1);
+            return solve(r,c);
           }
         }
       }
@@ -107,18 +111,20 @@ public class Maze{
         All visited spots that were not part of the solution are changed to '.'
         All visited spots that are part of the solution are changed to '@'
     */
-    private int solve(int r, int c, int squaresToE){ //you can add more parameters since this is private
+    private int solve(int r, int c){ //you can add more parameters since this is private
         //automatic animation! You are welcome.
-        if(animate){
-            clearTerminal();
-            System.out.println(this);
-            wait(20);
-        }
+      if (!reachedEnd){
         if (maze[r][c] == 'E'){
-          return squaresToE;
+          reachedEnd = true;
+          return sum-1; //minus 1 accounts for the sum++ we did when we hit an E earlier in the recursive sequence
         }
         if (maze[r][c] == '#' || maze[r][c] == '.'){
           return 0; //my current position is a wall or a place already visited
+        }
+        if(animate){
+          clearTerminal();
+          System.out.println(this);
+          wait(20);
         }
         //if the current position is surrounded by deadends...
         if ((maze[r+1][c] == '@' || maze[r+1][c] == '#' || maze[r+1][c] == '.') &&
@@ -126,16 +132,34 @@ public class Maze{
             (maze[r][c+1] == '@' || maze[r][c+1] == '#' || maze[r][c+1] == '.') &&
             (maze[r][c-1] == '@' || maze[r][c-1] == '#' || maze[r][c-1] == '.')){
               maze[r][c] = '.'; //...then mark this spot as visited but not correct path
-              //System.out.println("r:"+r + ", c:"+c+"\n");
-              if (maze[r][c] == '@'){
-                return -1;
-              }
-              return solve(r+1,c,squaresToE-1) + solve(r-1,c,squaresToE-1) + solve(r,c+1,squaresToE-1) + solve(r,c-1,squaresToE-1); //backtracks
+              sum--;
+              return solve(r+1,c) + solve(r-1,c) + solve(r,c+1) + solve(r,c-1); //backtracks
         }
-        if (maze[r][c] == ' '){
-          maze[r][c] = '@';
+        maze[r][c] = '@'; //because '#' and '.' and 'E' were all already accounted for in earlier if statements, we know that this square must be ' '
+        ArrayList<Integer> sumOfPaths = new ArrayList<>();
+        if (maze[r+1][c] == ' ' || maze[r+1][c] == 'E'){
+          sum++;
+          sumOfPaths.add(solve(r+1,c));
         }
-        return solve(r+1,c,squaresToE+1) + solve(r-1,c,squaresToE) + solve(r,c+1,squaresToE) + solve(r,c-1,squaresToE); //branches out
+        if (maze[r-1][c] == ' ' || maze[r-1][c] == 'E'){
+          sum++;
+          sumOfPaths.add(solve(r-1,c));
+        }
+        if (maze[r][c+1] == ' ' || maze[r][c+1] == 'E'){
+          sum++;
+          sumOfPaths.add(solve(r,c+1));
+        }
+        if (maze[r][c-1] == ' ' || maze[r][c-1] == 'E'){
+          sum++;
+          sumOfPaths.add(solve(r,c-1));
+        }
+        int sum = 0;
+        for (int n = 0; n < sumOfPaths.size(); n++){
+          sum+= sumOfPaths.get(n);
+        }
+        return sum;
+      }
+      return 0; //if maze has reached end, then nothing should happen
     }
 
 
