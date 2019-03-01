@@ -8,6 +8,8 @@ public class Maze{
     private boolean animate;//false by default
     private int sum;
     private boolean reachedEnd;
+    private int beginningR;
+    private int beginningC;
 
     /*Constructor loads a maze text file, and sets animate to false by default.
       1. The file contains a rectangular ascii maze, made with the following 4 characters:
@@ -38,6 +40,8 @@ public class Maze{
             maze[r][c] = lines.get(r).charAt(c);
             if (maze[r][c] == 'S'){
               numStarts++;
+              beginningR = r;
+              beginningC = c;
             }
             if (maze[r][c] == 'E'){
               numEnds++;
@@ -131,11 +135,16 @@ public class Maze{
             (maze[r-1][c] == '@' || maze[r-1][c] == '#' || maze[r-1][c] == '.') &&
             (maze[r][c+1] == '@' || maze[r][c+1] == '#' || maze[r][c+1] == '.') &&
             (maze[r][c-1] == '@' || maze[r][c-1] == '#' || maze[r][c-1] == '.')){
+              if (r == beginningR && c == beginningC){
+                maze[r][c] = '@';
+                return -1;
+              }
               maze[r][c] = '.'; //...then mark this spot as visited but not correct path
               sum--;
               return solve(r+1,c) + solve(r-1,c) + solve(r,c+1) + solve(r,c-1); //backtracks
         }
         maze[r][c] = '@'; //because '#' and '.' and 'E' were all already accounted for in earlier if statements, we know that this square must be ' '
+        //only branch out if it is possible
         ArrayList<Integer> sumOfPaths = new ArrayList<>();
         if (maze[r+1][c] == ' ' || maze[r+1][c] == 'E'){
           sum++;
